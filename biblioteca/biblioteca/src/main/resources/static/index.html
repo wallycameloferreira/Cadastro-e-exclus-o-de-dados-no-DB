@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Biblioteca · Estante Viva</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6ecf4 100%);
+            color: #1e2b3c;
+            padding: 28px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+            color: #1e3c5c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h1 span {
+            background: #2c5f8a;
+            color: white;
+            font-size: 1.2rem;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 25px 0 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 40px;
+            background: #ffffffd9;
+            backdrop-filter: blur(4px);
+            color: #1e3c5c;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 20, 40, 0.06);
+            border: 1px solid #cddbe9;
+        }
+
+        .nav button:hover {
+            background: #ffffff;
+            box-shadow: 0 8px 16px rgba(30, 60, 100, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav button.ativo {
+            background: #2c5f8a;
+            color: #fff;
+            border-color: #2c5f8a;
+            box-shadow: 0 8px 16px rgba(44, 95, 138, 0.25);
+        }
+
+        .tela {
+            display: none;
+            background: #ffffffdd;
+            backdrop-filter: blur(6px);
+            padding: 32px 30px;
+            border-radius: 32px;
+            box-shadow: 0 24px 40px -12px rgba(20, 40, 70, 0.25);
+            border: 1px solid #ffffffaa;
+            animation: fadeIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        .tela.ativa {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-weight: 600;
+            font-size: 1.7rem;
+            color: #1e3c5c;
+            margin-bottom: 22px;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "📖";
+            font-size: 1.8rem;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 18px;
+            font-weight: 600;
+            color: #1e3c5c;
+            font-size: 0.95rem;
+        }
+
+        form input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-top: 8px;
+            border: 1.5px solid #d6e2ef;
+            border-radius: 18px;
+            font-size: 15px;
+            background: #f9fcff;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: #2c5f8a;
+            background: #ffffff;
+            box-shadow: 0 0 0 5px rgba(44, 95, 138, 0.12);
+        }
+
+        .btn-primario {
+            width: 100%;
+            padding: 16px;
+            background: #1e3c5c;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 0.3px;
+            box-shadow: 0 12px 18px -8px rgba(30, 60, 92, 0.3);
+        }
+
+        .btn-primario:hover {
+            background: #112b40;
+            transform: scale(1.01);
+            box-shadow: 0 18px 24px -8px rgba(30, 60, 92, 0.4);
+        }
+
+        .filtro-container {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filtro-container input {
+            flex: 2;
+            min-width: 200px;
+            padding: 14px 18px;
+            border: 1.5px solid #d6e2ef;
+            border-radius: 30px;
+            font-size: 15px;
+            background: #f9fcff;
+            transition: 0.2s;
+        }
+
+        .filtro-container input:focus {
+            outline: none;
+            border-color: #2c5f8a;
+            background: #fff;
+            box-shadow: 0 0 0 5px rgba(44, 95, 138, 0.12);
+        }
+
+        .filtro-container .contador {
+            background: #e2eaf3;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3c5c;
+            white-space: nowrap;
+        }
+
+        .tabela-wrapper {
+            overflow-x: auto;
+            border-radius: 24px;
+            border: 1px solid #e1ebf5;
+            background: #ffffffb3;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 6px 18px rgba(0, 20, 40, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            min-width: 500px;
+        }
+
+        th {
+            text-align: left;
+            padding: 18px 16px;
+            background: #eef4fc;
+            color: #1e3c5c;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #cfddee;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e6eef8;
+            vertical-align: middle;
+            color: #1a2a3a;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: background 0.15s;
+        }
+
+        tr:hover {
+            background: #f3f9ff;
+        }
+
+        .titulo-livro {
+            font-weight: 700;
+            color: #1e3c5c;
+        }
+
+        .ano-badge {
+            background: #e2eaf3;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            color: #1e3c5c;
+        }
+
+        .btn-excluir {
+            background: #ffe8e8;
+            color: #b13e3e;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #ffcdcd;
+        }
+
+        .btn-excluir:hover {
+            background: #ffd6d6;
+            color: #9e2e2e;
+            transform: scale(0.97);
+            border-color: #ffb3b3;
+        }
+
+        .vazio {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7a8fa0;
+            font-style: italic;
+            font-size: 1.1rem;
+            background: #f9fcff;
+            border-radius: 24px;
+            border: 1px dashed #cddbe9;
+        }
+
+        .btn-voltar {
+            margin-top: 28px;
+            background: #ffffff;
+            color: #1e3c5c;
+            border: 1.5px solid #cddbe9;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-voltar:hover {
+            background: #f2f8ff;
+            border-color: #2c5f8a;
+            color: #112b40;
+            box-shadow: 0 8px 14px -6px rgba(30, 60, 92, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 16px; }
+            .tela { padding: 22px 18px; }
+            h1 { font-size: 1.8rem; }
+            h1 span { font-size: 0.9rem; }
+            th, td { padding: 12px 10px; }
+            .filtro-container input { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>
+    📚 Minha Biblioteca
+    <span>estante viva</span>
+</h1>
+
+<nav class="nav">
+    <button id="btnTelaCadastro" class="ativo" onclick="mostrarTela('cadastro')">
+        ➕ Cadastrar
+    </button>
+    <button id="btnTelaLista" onclick="mostrarTela('lista')">
+        📖 Ver Livros
+    </button>
+</nav>
+
+<section id="tela-cadastro" class="tela ativa">
+    <h2>Novo livro</h2>
+
+    <form id="formLivro">
+        <label>
+            Título:
+            <input type="text" id="titulo" required placeholder="Ex: Dom Casmurro">
+        </label>
+
+        <label>
+            Autor:
+            <input type="text" id="autor" required placeholder="Ex: Machado de Assis">
+        </label>
+
+        <label>
+            Ano:
+            <input type="number" id="ano" required min="0" max="2100" placeholder="Ex: 1899">
+        </label>
+
+        <button type="submit" class="btn-primario">📥 Cadastrar Livro</button>
+    </form>
+
+    <button class="btn-voltar" onclick="mostrarTela('lista')">
+        ← Ir para a lista
+    </button>
+</section>
+
+<section id="tela-lista" class="tela">
+    <h2>Acervo</h2>
+
+    <div class="filtro-container">
+        <input type="text" id="filtroInput" placeholder="🔍 Filtrar por título, autor ou ano..." oninput="filtrarTabela()">
+        <span class="contador" id="contadorLivros">0 livros</span>
+    </div>
+
+    <div class="tabela-wrapper">
+        <table id="tabelaLivros">
+            <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Ano</th>
+                <th style="width: 100px;">Ações</th>
+            </tr>
+            </thead>
+            <tbody id="corpoTabela">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="mensagemVazia" class="vazio" style="display: none;">
+        Nenhum livro encontrado.
+    </div>
+
+    <button class="btn-voltar" onclick="mostrarTela('cadastro')">
+        ← Voltar para o cadastro
+    </button>
+</section>
+
+<script>
+    let livrosCache = [];
+    let filtroAtual = '';
+
+    function mostrarTela(nome) {
+        document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+        document.getElementById('tela-' + nome).classList.add('ativa');
+
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('ativo'));
+        const btnId = 'btnTela' + nome.charAt(0).toUpperCase() + nome.slice(1);
+        document.getElementById(btnId)?.classList.add('ativo');
+
+        if (nome === 'lista') {
+            carregarLivros();
+        }
+    }
+
+    async function carregarLivros() {
+        const corpoTabela = document.getElementById("corpoTabela");
+        const mensagemVazia = document.getElementById("mensagemVazia");
+        const contador = document.getElementById("contadorLivros");
+
+        corpoTabela.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:#7a8fa0;">Carregando acervo...</td></tr>`;
+        mensagemVazia.style.display = 'none';
+
+        try {
+            const resposta = await fetch("/api/livros");
+            if (!resposta.ok) throw new Error("Erro ao buscar livros");
+            const livros = await resposta.json();
+
+            livrosCache = livros;
+
+            renderizarTabela(livrosCache, filtroAtual);
+
+        } catch (err) {
+            corpoTabela.innerHTML = '';
+            mensagemVazia.textContent = `Erro: ${err.message}`;
+            mensagemVazia.style.display = 'block';
+            contador.textContent = '0 livros';
+        }
+    }
+
+    function renderizarTabela(livros, filtro) {
+        const corpoTabela = document.getElementById("corpoTabela");
+        const mensagemVazia = document.getElementById("mensagemVazia");
+        const contador = document.getElementById("contadorLivros");
+
+        let livrosFiltrados = livros;
+
+        if (filtro && filtro.trim() !== '') {
+            const termo = filtro.trim().toLowerCase();
+            livrosFiltrados = livros.filter(livro => {
+                const titulo = (livro.titulo || '').toLowerCase();
+                const autor = (livro.autor || '').toLowerCase();
+                const anoStr = String(livro.ano || '');
+                return titulo.includes(termo) || autor.includes(termo) || anoStr.includes(termo);
+            });
+        }
+
+        contador.textContent = `${livrosFiltrados.length} ${livrosFiltrados.length === 1 ? 'livro' : 'livros'}`;
+
+        if (livrosFiltrados.length === 0) {
+            corpoTabela.innerHTML = '';
+            mensagemVazia.style.display = 'block';
+            if (livros.length > 0 && filtro.trim() !== '') {
+                mensagemVazia.textContent = 'Nenhum livro corresponde ao filtro.';
+            } else {
+                mensagemVazia.textContent = 'Nenhum livro cadastrado ainda.';
+            }
+            return;
+        }
+
+        mensagemVazia.style.display = 'none';
+        corpoTabela.innerHTML = '';
+
+        livrosFiltrados.forEach(livro => {
+            const tr = document.createElement('tr');
+
+            const tdTitulo = document.createElement('td');
+            tdTitulo.className = 'titulo-livro';
+            tdTitulo.textContent = livro.titulo;
+
+            const tdAutor = document.createElement('td');
+            tdAutor.textContent = livro.autor;
+
+            const tdAno = document.createElement('td');
+            const spanAno = document.createElement('span');
+            spanAno.className = 'ano-badge';
+            spanAno.textContent = livro.ano;
+            tdAno.appendChild(spanAno);
+
+            const tdAcoes = document.createElement('td');
+            const btnExcluir = document.createElement('button');
+            btnExcluir.textContent = 'Excluir';
+            btnExcluir.className = 'btn-excluir';
+            btnExcluir.onclick = () => excluirLivro(livro.id);
+            tdAcoes.appendChild(btnExcluir);
+
+            tr.appendChild(tdTitulo);
+            tr.appendChild(tdAutor);
+            tr.appendChild(tdAno);
+            tr.appendChild(tdAcoes);
+
+            corpoTabela.appendChild(tr);
+        });
+    }
+
+    function filtrarTabela() {
+        const inputFiltro = document.getElementById('filtroInput');
+        filtroAtual = inputFiltro.value;
+        renderizarTabela(livrosCache, filtroAtual);
+    }
+
+    document.getElementById("formLivro").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const novoLivro = {
+            titulo: document.getElementById("titulo").value.trim(),
+            autor:  document.getElementById("autor").value.trim(),
+            ano:    parseInt(document.getElementById("ano").value, 10)
+        };
+
+        if (!novoLivro.titulo || !novoLivro.autor || isNaN(novoLivro.ano)) {
+            alert("Preencha todos os campos corretamente.");
+            return;
+        }
+
+        try {
+            const resp = await fetch("/api/livros", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(novoLivro)
+            });
+
+            if (!resp.ok) throw new Error("Falha ao cadastrar");
+
+            this.reset();
+            alert("Livro cadastrado com sucesso!");
+            document.getElementById('filtroInput').value = '';
+            filtroAtual = '';
+            mostrarTela("lista");
+        } catch (err) {
+            alert("Erro ao cadastrar: " + err.message);
+        }
+    });
+
+    async function excluirLivro(id) {
+        if (!confirm("Deseja realmente excluir este livro?")) return;
+
+        try {
+            const resp = await fetch(`/api/livros/${id}`, { method: "DELETE" });
+            if (!resp.ok) throw new Error("Falha ao excluir");
+
+            livrosCache = livrosCache.filter(livro => livro.id !== id);
+
+            renderizarTabela(livrosCache, filtroAtual);
+        } catch (err) {
+            alert("Erro ao excluir: " + err.message);
+        }
+    }
+
+    (async function inicializar() {
+        try {
+            const resposta = await fetch("/api/livros");
+            if (resposta.ok) {
+                livrosCache = await resposta.json();
+            }
+        } catch (err) {
+            console.warn("Não foi possível pré-carregar os livros:", err);
+        }
+        if (document.getElementById('tela-lista').classList.contains('ativa')) {
+            carregarLivros();
+        }
+    })();
+</script>
+
+</body>
+</html>
